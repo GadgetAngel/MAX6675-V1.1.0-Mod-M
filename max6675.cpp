@@ -62,6 +62,42 @@ float MAX6675::readCelsius(void) {
 /**************************************************************************/
 float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 
+/**************************************************************************/
+/*!
+    @brief  Read the Raw value of unsigned 16 bits for the temperature
+    @returns Raw value read in 16 bits!
+*/
+/**************************************************************************/
+uint16_t MAX6675::readRaw16(void) {
+
+  // try sending back same temperature if trying
+  // to read faster than MAX6675 likes
+  // see if this avoids 0 being sent back
+  if(Last_read_time + 500 > millis())
+    return Last_read_temp;
+  
+  Last_read_time = millis();
+
+
+  uint16_t v;
+
+  digitalWrite(cs, LOW);
+  delayMicroseconds(10);
+
+  v = spiread();
+  v <<= 8;
+  v |= spiread();
+
+  digitalWrite(cs, HIGH);
+
+  Last_read_temp = v;
+
+  return v 
+
+ }
+
+
+
 byte MAX6675::spiread(void) {
   int i;
   byte d = 0;
