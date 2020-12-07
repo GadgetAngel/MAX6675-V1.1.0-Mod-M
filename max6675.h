@@ -29,7 +29,7 @@ public:
   float readFarenheit(void) { return readFahrenheit(); }
 
 private:
-  unsigned long Last_read_time=0;
+  uint16_t Last_read_time=0;
   int8_t sclk, miso, cs;
   uint8_t spiread(void);
 };

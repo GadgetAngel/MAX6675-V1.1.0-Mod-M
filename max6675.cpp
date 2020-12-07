@@ -73,7 +73,7 @@ uint16_t MAX6675::readRaw16(void) {
   // try sending back same temperature if trying
   // to read faster than MAX6675 likes
   // see if this avoids 0 being sent back
-  if(Last_read_time + 500 > millis())
+  if(Last_read_time + 500UL > millis())
     return Last_read_temp;
   
   Last_read_time = millis();
