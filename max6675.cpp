@@ -1,7 +1,7 @@
 // this library is public domain. enjoy!
 // https://learn.adafruit.com/thermocouple/
 
-#include "MAX6675.h"
+#include "max6675.h"
 #include <SPI.h>
 #include <stdlib.h>
 #ifdef __AVR
