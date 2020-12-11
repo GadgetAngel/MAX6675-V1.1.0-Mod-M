@@ -6,7 +6,7 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-max6675	KEYWORD1
+MAX6675	KEYWORD1
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -14,7 +14,8 @@ max6675	KEYWORD1
 
 readCelsius	KEYWORD2
 readFahrenheit	KEYWORD2
-readFarenheit	KEYWORD2
+readRaw16       KEYWORD2
+readRaw8        KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
