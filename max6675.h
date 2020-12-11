@@ -31,7 +31,7 @@ public:
   float readFarenheit(void) { return readFahrenheit(); }
 
 private:
-  uint16_t Last_read_time=0;
+
   boolean initialized;
 
   int8_t sclk, miso, cs;

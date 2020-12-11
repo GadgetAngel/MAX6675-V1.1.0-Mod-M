@@ -2,6 +2,7 @@
 // https://learn.adafruit.com/thermocouple/
 
 #include "max6675.h"
+#include "E:/TEST/Marlin-bugfix-2.0.x/Marlin/src/HAL/shared/Delay.h"
 #include <SPI.h>
 #include <stdlib.h>
 #ifdef __AVR
@@ -9,6 +10,9 @@
 #elif defined(ESP8266)
   #include <pgmspace.h>
 #endif
+
+static SPISettings max6675_spisettings =
+    SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);
 
 /**************************************************************************/
 /*!
@@ -46,18 +50,26 @@ MAX6675::MAX6675(int8_t _cs) {
 */
 /**************************************************************************/
 void MAX6675::begin(void) {
+
   //define pin modes
   pinMode(cs, OUTPUT);
-  digitalWrite(cs, HIGH);
+  
 
   if (sclk == -1) {
     // hardware SPI
     //start and configure hardware SPI
-    SPI.begin();
-  } else {
+    //SPI.begin();
+    spiBegin();
+    spiInit(SPI_QUARTER_SPEED);
+  } 
+  else {
     pinMode(sclk, OUTPUT); 
     pinMode(miso, INPUT);
+
   }
+
+  digitalWrite(cs, HIGH);
+
   initialized = true;
 }
 
@@ -120,20 +132,24 @@ uint16_t MAX6675::readRaw16(void) {
   if (sclk == -1) {
     // hardware SPI
 
-    SPI.beginTransaction(SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0));
+    //SPI.beginTransaction(max6675_spisettings);
     //SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+
+    digitalWrite(cs, LOW);
+    //delayMicroseconds(10);
+    DELAY_NS(100);    
 
     v = spiread();
     v <<= 8;
     v |= spiread();
 
-    SPI.endTransaction();
+    //SPI.endTransaction();
+    digitalWrite(cs, HIGH);
+
   } 
   else {
-
-    // software SPI
+    // Software SPI
     digitalWrite(cs, LOW);
-    //delay(1);
     delayMicroseconds(10);   
 
     v = spiread();
@@ -160,13 +176,12 @@ uint8_t MAX6675::spiread(void) {
   
   if(sclk == -1) {
     // hardware SPI
-
-    d = SPI.transfer(0);
-
+    //d = SPI.transfer(0);
+    d = spiRec();  
   } 
   else {
-    // software SPI
 
+    // software SPI
     for (i = 7; i >= 0; i--) {
     digitalWrite(sclk, LOW);
     delayMicroseconds(10);
@@ -174,9 +189,7 @@ uint8_t MAX6675::spiread(void) {
       // set the bit to 0 no matter what
       d |= (1 << i);
     }
-
       digitalWrite(sclk, HIGH);
-      //delay(1);
       delayMicroseconds(10);      
     }
   }
