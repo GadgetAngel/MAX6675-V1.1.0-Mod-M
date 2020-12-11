@@ -33,7 +33,7 @@ public:
 
 private:
   uint16_t Last_read_time=0;
-  bool initialized;
+  boolean initialized;
 
   int8_t sclk, miso, cs;
   uint8_t spiread(void);

@@ -102,7 +102,6 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
 
-  /*
   // try sending back same temperature if trying
   // to read faster than MAX6675 likes
   // see if this avoids 0 being sent back
@@ -110,7 +109,7 @@ uint16_t MAX6675::readRaw16(void) {
     return Last_read_temp;
   
   Last_read_time = millis();
-  */
+  
 
   uint16_t v;
 
@@ -118,7 +117,7 @@ uint16_t MAX6675::readRaw16(void) {
   v <<= 8;
   v |= spiread();
 
-  //Last_read_temp = v;
+  Last_read_temp = v;
 
   return v; 
 
@@ -151,7 +150,7 @@ uint8_t MAX6675::spiread(void) {
   if(sclk == -1) {
     // hardware SPI
 
-SPI.beginTransaction(SPISettings(SPI_HALF_SPEED, MSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(SPI_HALF_SPEED, MSBFIRST, SPI_MODE0));
     //SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
 
     d = SPI.transfer(0);
