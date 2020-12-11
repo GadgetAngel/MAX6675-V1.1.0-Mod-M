@@ -107,10 +107,10 @@ uint16_t MAX6675::readRaw16(void) {
   // try sending back same temperature if trying
   // to read faster than MAX6675 likes
   // see if this avoids 0 being sent back
-  if(Last_read_time + 500UL > millis())
-    return Last_read_temp;
-  
-  Last_read_time = millis();
+  //if(Last_read_time + 500UL > millis())
+    //return Last_read_temp;
+
+  //Last_read_time = millis();
 
  // backcompatibility!
   if (! initialized) {
@@ -120,7 +120,7 @@ uint16_t MAX6675::readRaw16(void) {
   if (sclk == -1) {
     // hardware SPI
 
-    SPI.beginTransaction(SPISettings(SPI_HALF_SPEED, MSBFIRST, SPI_MODE0));
+    SPI.beginTransaction(SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0));
     //SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
 
     v = spiread();
@@ -145,7 +145,7 @@ uint16_t MAX6675::readRaw16(void) {
 
   }
 
-  Last_read_temp = v;
+  //Last_read_temp = v;
 
   return v; 
 
