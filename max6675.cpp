@@ -102,6 +102,8 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
 
+  uint16_t v;
+
   // try sending back same temperature if trying
   // to read faster than MAX6675 likes
   // see if this avoids 0 being sent back
@@ -115,18 +117,33 @@ uint16_t MAX6675::readRaw16(void) {
     begin();
   }
 
-  digitalWrite(cs, LOW);
-  //delay(1);
-  delayMicroseconds(10);   
+  if (sclk == -1) {
+    // hardware SPI
 
-  uint16_t v;
+    SPI.beginTransaction(SPISettings(SPI_HALF_SPEED, MSBFIRST, SPI_MODE0));
+    //SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
 
-  v = spiread();
-  v <<= 8;
-  v |= spiread();
+    v = spiread();
+    v <<= 8;
+    v |= spiread();
 
-  digitalWrite(cs, HIGH);
-  //Serial.println(d, HEX);
+    SPI.endTransaction();
+  } 
+  else {
+
+    // software SPI
+    digitalWrite(cs, LOW);
+    //delay(1);
+    delayMicroseconds(10);   
+
+    v = spiread();
+    v <<= 8;
+    v |= spiread();
+
+    digitalWrite(cs, HIGH);
+    //Serial.println(d, HEX);
+
+  }
 
   Last_read_temp = v;
 
@@ -144,13 +161,10 @@ uint8_t MAX6675::spiread(void) {
   if(sclk == -1) {
     // hardware SPI
 
-    SPI.beginTransaction(SPISettings(SPI_HALF_SPEED, MSBFIRST, SPI_MODE0));
-    //SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
-
     d = SPI.transfer(0);
 
-    SPI.endTransaction();
-  } else {
+  } 
+  else {
     // software SPI
 
     for (i = 7; i >= 0; i--) {
@@ -160,24 +174,6 @@ uint8_t MAX6675::spiread(void) {
       // set the bit to 0 no matter what
       d |= (1 << i);
     }
-
-    /*
-    digitalWrite(sclk, LOW);
-    delayMicroseconds(10);
-    //delay(1);
-
-    for (int i= 7; i >= 0; i--) {
-      digitalWrite(sclk, LOW);
-      delay(1);
-      //d <<= 1;
-      //if (digitalRead(miso)) {
-	    //  d |= 1;
-      //}
-      if (digitalRead(miso)) {
-        // set the bit to 0 no matter what
-        d |= (1 << i);
-      } 
-      */
 
       digitalWrite(sclk, HIGH);
       //delay(1);
