@@ -25,7 +25,6 @@ public:
   float readCelsius(void);
   float readFahrenheit(void);
   uint16_t readRaw16(void);
-  uint8_t readRaw8(void);
 
   /*!    @brief  For compatibility with older versions
          @returns Temperature in F or NAN on failure! */

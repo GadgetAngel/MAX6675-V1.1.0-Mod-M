@@ -109,7 +109,15 @@ uint16_t MAX6675::readRaw16(void) {
     return Last_read_temp;
   
   Last_read_time = millis();
-  
+
+ // backcompatibility!
+  if (! initialized) {
+    begin();
+  }
+
+  digitalWrite(cs, LOW);
+  //delay(1);
+  delayMicroseconds(10);   
 
   uint16_t v;
 
@@ -117,36 +125,22 @@ uint16_t MAX6675::readRaw16(void) {
   v <<= 8;
   v |= spiread();
 
+  digitalWrite(cs, HIGH);
+  //Serial.println(d, HEX);
+
   Last_read_temp = v;
 
   return v; 
 
  }
 
-/**************************************************************************/
-/*!
-    @brief  Read the Raw value of unsigned 8 bits
-    @returns Raw value read in 8 bits!
-*/
-/**************************************************************************/
-uint8_t MAX6675::readRaw8(void) { return spiread(); }
-
-
 
 /**********************************************/
 
 uint8_t MAX6675::spiread(void) {
-
+  int i;
   uint8_t d = 0;
-
-  // backcompatibility!
-  if (! initialized) {
-    begin();
-  }
-
-  digitalWrite(cs, LOW);
-  delay(1);
-
+  
   if(sclk == -1) {
     // hardware SPI
 
@@ -159,8 +153,18 @@ uint8_t MAX6675::spiread(void) {
   } else {
     // software SPI
 
+    for (i = 7; i >= 0; i--) {
     digitalWrite(sclk, LOW);
-    delay(1);
+    delayMicroseconds(10);
+    if (digitalRead(miso)) {
+      // set the bit to 0 no matter what
+      d |= (1 << i);
+    }
+
+    /*
+    digitalWrite(sclk, LOW);
+    delayMicroseconds(10);
+    //delay(1);
 
     for (int i= 7; i >= 0; i--) {
       digitalWrite(sclk, LOW);
@@ -173,13 +177,13 @@ uint8_t MAX6675::spiread(void) {
         // set the bit to 0 no matter what
         d |= (1 << i);
       } 
+      */
 
       digitalWrite(sclk, HIGH);
-      delay(1);
+      //delay(1);
+      delayMicroseconds(10);      
     }
   }
 
-  digitalWrite(cs, HIGH);
-  //Serial.println(d, HEX);
   return d;
 }
