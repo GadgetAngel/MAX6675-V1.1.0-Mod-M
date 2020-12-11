@@ -2,13 +2,12 @@
 // https://learn.adafruit.com/thermocouple/
 
 #include "MAX6675.h"
-
 #include <SPI.h>
 #include <stdlib.h>
 #ifdef __AVR
-#include <avr/pgmspace.h>
+  #include <avr/pgmspace.h>
 #elif defined(ESP8266)
-#include <pgmspace.h>
+  #include <pgmspace.h>
 #endif
 
 /**************************************************************************/
