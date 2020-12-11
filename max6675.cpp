@@ -1,27 +1,68 @@
 // this library is public domain. enjoy!
 // https://learn.adafruit.com/thermocouple/
 
-#include "max6675.h"
+#include "MAX6675.h"
+
+#include "Adafruit_MAX31865.h"
+#ifdef __AVR
+#include <avr/pgmspace.h>
+#elif defined(ESP8266)
+#include <pgmspace.h>
+#endif
+
+#include <SPI.h>
+#include <stdlib.h>
+
 
 /**************************************************************************/
 /*!
-    @brief  Initialize a MAX6675 sensor
-    @param   SCLK The Arduino pin connected to Clock
-    @param   CS The Arduino pin connected to Chip Select
-    @param   MISO The Arduino pin connected to Data Out
+    @brief Create the interface object using software (bitbang) SPI
+    @param _cs the SPI CS pin to use
+    @param _sclk the SPI clock pin to use    
+    @param _miso the SPI MISO pin to use
 */
 /**************************************************************************/
-MAX6675::MAX6675(int8_t SCLK, int8_t CS, int8_t MISO) {
-  sclk = SCLK;
-  cs = CS;
-  miso = MISO;
+MAX6675::MAX6675(int8_t _cs, int8_t _sclk, int8_t _miso) {
+  sclk = _sclk;
+  cs = _cs;
+  miso = _miso;
 
-  // define pin modes
+  initialized = false;
+}
+
+/**************************************************************************/
+/*!
+    @brief Create the interface object using hardware SPI
+    @param _cs the SPI CS pin to use
+*/
+/**************************************************************************/
+MAX6675::MAX6675(int8_t _cs) {
+  cs = _cs;
+  sclk = miso = -1;
+
+  initialized = false;
+}
+
+/**************************************************************************/
+/*!
+    @brief Initialize the SPI interface 
+    @return True
+*/
+/**************************************************************************/
+void MAX6675::begin(void) {
+  //define pin modes
   pinMode(cs, OUTPUT);
-  pinMode(sclk, OUTPUT);
-  pinMode(miso, INPUT);
-
   digitalWrite(cs, HIGH);
+
+  if (sclk == -1) {
+    // hardware SPI
+    //start and configure hardware SPI
+    SPI.begin();
+  } else {
+    pinMode(sclk, OUTPUT); 
+    pinMode(miso, INPUT);
+  }
+  initialized = true;
 }
 
 /**************************************************************************/
@@ -34,14 +75,9 @@ float MAX6675::readCelsius(void) {
 
   uint16_t v;
 
-  digitalWrite(cs, LOW);
-  delayMicroseconds(10);
-
   v = spiread();
   v <<= 8;
   v |= spiread();
-
-  digitalWrite(cs, HIGH);
 
   if (v & 0x4) {
     // uh oh, no thermocouple attached!
@@ -70,6 +106,7 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
 
+  /*
   // try sending back same temperature if trying
   // to read faster than MAX6675 likes
   // see if this avoids 0 being sent back
@@ -77,42 +114,77 @@ uint16_t MAX6675::readRaw16(void) {
     return Last_read_temp;
   
   Last_read_time = millis();
-
+  */
 
   uint16_t v;
-
-  digitalWrite(cs, LOW);
-  delayMicroseconds(10);
 
   v = spiread();
   v <<= 8;
   v |= spiread();
 
-  digitalWrite(cs, HIGH);
+  //Last_read_temp = v;
 
-  Last_read_temp = v;
-
-  return v 
+  return v; 
 
  }
 
+/**************************************************************************/
+/*!
+    @brief  Read the Raw value of unsigned 8 bits
+    @returns Raw value read in 8 bits!
+*/
+/**************************************************************************/
+uint8_t MAX6675::readRaw8(void) { return spiread(); }
 
 
-byte MAX6675::spiread(void) {
-  int i;
-  byte d = 0;
 
-  for (i = 7; i >= 0; i--) {
-    digitalWrite(sclk, LOW);
-    delayMicroseconds(10);
-    if (digitalRead(miso)) {
-      // set the bit to 0 no matter what
-      d |= (1 << i);
-    }
+/**********************************************/
 
-    digitalWrite(sclk, HIGH);
-    delayMicroseconds(10);
+uint8_t MAX6675::spiread(void) {
+
+  uint8_t d = 0;
+
+  // backcompatibility!
+  if (! initialized) {
+    begin();
   }
 
+  digitalWrite(cs, LOW);
+  delay(1);
+
+  if(sclk == -1) {
+    // hardware SPI
+
+SPI.beginTransaction(SPISettings(SPI_HALF_SPEED, MSBFIRST, SPI_MODE0));
+    //SPI.beginTransaction(SPISettings(4000000, MSBFIRST, SPI_MODE0));
+
+    d = SPI.transfer(0);
+
+    SPI.endTransaction();
+  } else {
+    // software SPI
+
+    digitalWrite(sclk, LOW);
+    delay(1);
+
+    for (int i= 7; i >= 0; i--) {
+      digitalWrite(sclk, LOW);
+      delay(1);
+      //d <<= 1;
+      //if (digitalRead(miso)) {
+	    //  d |= 1;
+      //}
+      if (digitalRead(miso)) {
+        // set the bit to 0 no matter what
+        d |= (1 << i);
+      } 
+
+      digitalWrite(sclk, HIGH);
+      delay(1);
+    }
+  }
+
+  digitalWrite(cs, HIGH);
+  //Serial.println(d, HEX);
   return d;
 }
