@@ -17,8 +17,8 @@
 /**************************************************************************/
 class MAX6675 {
 public:
-  double Last_read_temp=0;
-  MAX6675( int8_t _cs, int8_t _sclk, int8_t _miso);
+
+  MAX6675( int8_t _cs, int8_t _miso, int8_t _sclk);
   MAX6675(int8_t _cs);
 
   void begin(void);
@@ -32,7 +32,7 @@ public:
 
 private:
 
-  boolean initialized;
+  bool initialized;
 
   int8_t sclk, miso, cs;
   uint8_t spiread(void);
