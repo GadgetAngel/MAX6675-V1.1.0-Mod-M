@@ -3,8 +3,6 @@
 
 #include "max6675.h"
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
-#include <SPI.h>
-#include <stdlib.h>
 
 #ifdef __AVR
   #include <avr/pgmspace.h>
@@ -12,8 +10,16 @@
   #include <pgmspace.h>
 #endif
 
-//static SPISettings max6675_spisettings =
-//    SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);  //SPISettings(4000000, MSBFIRST, SPI_MODE0)
+#include <SPI.h>
+#include <stdlib.h>
+
+#ifndef __AVR
+  static SPISettings max6675_spisettings =
+      SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);  //SPISettings(4000000, MSBFIRST, SPI_MODE0)
+#else
+  static SPISettings max6675_spisettings = 
+      SPISettings(4000000, MSBFIRST, SPI_MODE0);
+#endif
 
 /**************************************************************************/
 /*!
@@ -51,6 +57,7 @@ MAX6675::MAX6675(int8_t _cs) {
 */
 /**************************************************************************/
 void MAX6675::begin(void) {
+
   //define pin modes
   pinMode(cs, OUTPUT);
   digitalWrite(cs, HIGH);
@@ -58,13 +65,14 @@ void MAX6675::begin(void) {
   if (sclk == -1) {
     // hardware SPI
 
-    //start and configure hardware SPI
-    //SPI.begin();
-
+    #ifndef __AVR
     //The SPI interface for LPC176x is incomplete, therefore
     // Use Marlin's calls for hardware SPI 
-    spiBegin();
-    spiInit(SPI_QUARTER_SPEED);
+      spiBegin();
+      spiInit(SPI_QUARTER_SPEED);
+    #else
+      SPI.begin();
+    #endif
   } 
   else {
     pinMode(sclk, OUTPUT); 
@@ -122,39 +130,33 @@ uint16_t MAX6675::readRaw16(void) {
     begin();
   }
 
+  //enable the SPI communication
+  digitalWrite(cs, LOW);
+  DELAY_NS(100);  
+
   if (sclk == -1) {
     // hardware SPI
-
-    //SPI.beginTransaction(max6675_spisettings);
-
-    //SPI.beginTransaction for LPC176x framework does not work
-    //therefore manipulate the CS line manually
-    digitalWrite(cs, LOW);
-    DELAY_NS(100);    
+    #ifdef __AVR
+      SPI.beginTransaction(max6675_spisettings);
+    #endif  
 
     v = spiread();
     v <<= 8;
     v |= spiread();
 
-    
-    //SPI.endTransaction();
-
-    //SPI,endTransaction(); for LPC176x framework does nothing.
-    //therfore manipulate the CS line manually
-    digitalWrite(cs, HIGH);
-
+    #ifdef __AVR    
+      SPI.endTransaction();
+    #endif
   } 
   else {
-    // Software SPI
-    digitalWrite(cs, LOW);;
-    DELAY_US(10);   
-
+    //Software SPI
     v = spiread();
     v <<= 8;
     v |= spiread();
-
-    digitalWrite(cs, HIGH);
   }
+
+  //disable SPI communication
+  digitalWrite(cs, HIGH);
 
   return v; 
 
@@ -169,12 +171,13 @@ uint8_t MAX6675::spiread(void) {
   
   if(sclk == -1) {
     // hardware SPI
-
-    //d = SPI.transfer(0);
-
-    // SPI.transfer(0); did not work for the LPC176x framework
-    //Use  Marlin's spiRec(); instead for hardware SPI
-    d = spiRec();  
+    #ifdef __AVR
+      d = SPI.transfer(0);
+    #else
+      // SPI.transfer(0); did not work for the LPC176x framework
+      //Use  Marlin's spiRec(); instead for hardware SPI
+      d = spiRec();
+    #endif   
   } 
   else {
     // software SPI
