@@ -2,6 +2,7 @@
 // https://learn.adafruit.com/thermocouple/
 
 #include "max6675.h"
+#include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
 #ifdef __AVR
