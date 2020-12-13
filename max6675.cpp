@@ -3,6 +3,10 @@
 
 #include "max6675.h"
 
+#ifndef __AVR
+  #include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
+#endif
+
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
 #ifdef __AVR
