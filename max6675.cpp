@@ -96,9 +96,7 @@ float MAX6675::readCelsius(void) {
 
   uint16_t v;
 
-  v = spiread();
-  v <<= 8;
-  v |= spiread();
+  v = readRaw16();
 
   if (v & 0x4) {
     // uh oh, no thermocouple attached!
