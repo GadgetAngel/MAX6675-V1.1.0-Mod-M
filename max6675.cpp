@@ -3,10 +3,6 @@
 
 #include "max6675.h"
 
-#ifndef __AVR
-  #include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
-#endif
-
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
 #ifdef __AVR
@@ -18,12 +14,12 @@
 #include <SPI.h>
 #include <stdlib.h>
 
-#ifndef __AVR
-  static SPISettings max6675_spisettings =
-      SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);  //SPISettings(4000000, MSBFIRST, SPI_MODE0)
-#else
+#ifdef __AVR
   static SPISettings max6675_spisettings = 
-      SPISettings(4000000, MSBFIRST, SPI_MODE0);
+      SPISettings(4000000, MSBFIRST, SPI_MODE0);    
+#else
+  static SPISettings max6675_spisettings =
+      SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);
 #endif
 
 /**************************************************************************/
@@ -70,7 +66,7 @@ void MAX6675::begin(void) {
   if (sclk == -1) {
     // hardware SPI
 
-    #ifndef __AVR
+    #if TARGET_LPC1768
     //The SPI interface for LPC176x is incomplete, therefore
     // Use Marlin's calls for hardware SPI 
       spiBegin();
@@ -139,7 +135,7 @@ uint16_t MAX6675::readRaw16(void) {
 
   if (sclk == -1) {
     // hardware SPI
-    #ifdef __AVR
+    #if defined(__AVR) || !TARGET_LPC1768
       SPI.beginTransaction(max6675_spisettings);
     #endif  
 
@@ -147,7 +143,7 @@ uint16_t MAX6675::readRaw16(void) {
     v <<= 8;
     v |= spiread();
 
-    #ifdef __AVR    
+    #if defined(__AVR) || !TARGET_LPC1768   
       SPI.endTransaction();
     #endif
   } 
@@ -174,12 +170,10 @@ uint8_t MAX6675::spiread(void) {
   
   if(sclk == -1) {
     // hardware SPI
-    #ifdef __AVR
-      d = SPI.transfer(0);
+    #if TARGET_LPC1768
+      d = spiRec();      
     #else
-      // SPI.transfer(0); did not work for the LPC176x framework
-      //Use  Marlin's spiRec(); instead for hardware SPI
-      d = spiRec();
+      d = SPI.transfer(0);
     #endif   
   } 
   else {
