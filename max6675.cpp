@@ -35,10 +35,10 @@
 */
 /**************************************************************************/
 MAX6675::MAX6675(int8_t _cs, int8_t _miso, int8_t _sclk) {
-  sclk = _sclk;
   cs = _cs;
   miso = _miso;
-
+  sclk = _sclk;
+  
   initialized = false;
 }
 
@@ -70,14 +70,7 @@ void MAX6675::begin(void) {
   if (sclk == -1) {
     // hardware SPI
 
-    #if TARGET_LPC1768
-    //The SPI interface for LPC176x is incomplete, therefore
-    // Use Marlin's calls for hardware SPI 
-      spiBegin();
-      spiInit(SPI_QUARTER_SPEED);
-    #else
       SPI.begin();
-    #endif
   } 
   else {
     pinMode(sclk, OUTPUT); 
@@ -88,7 +81,7 @@ void MAX6675::begin(void) {
 
 /**************************************************************************/
 /*!
-    @brief  Read the Celsius temperature
+    @brief  Read the Celsius temperature (supports negative tempatures)
     @returns Temperature in C or NAN on failure!
 */
 /**************************************************************************/
@@ -101,12 +94,22 @@ float MAX6675::readCelsius(void) {
   if (v & 0x4) {
     // uh oh, no thermocouple attached!
     return NAN;
-    // return -100;
   }
 
-  v >>= 3;
+  if (v & 0x8000) {
+    // Negative value, drop the lower 3 bits and explicitly extend sign bits.
+    v = 0xE000 | ((v >> 3) & 0x1FFF);
+  }
+  else {
+    // Positive value, just drop the lower 3 bits.
+    v >>= 3;
+  }
 
-  return v * 0.25;
+  float centigrade = v;
+
+  centigrade *= 0.25;
+
+  return centigrade;
 }
 
 /**************************************************************************/
@@ -125,8 +128,8 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 */
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
-
-  uint16_t v;
+  int i;
+  uint16_t v = 0;
 
  // backcompatibility!
   if (! initialized) {
@@ -135,27 +138,37 @@ uint16_t MAX6675::readRaw16(void) {
 
   //enable the SPI communication
   digitalWrite(cs, LOW);
-  DELAY_NS(100);  
+  DELAY_US(1000); 
 
   if (sclk == -1) {
     // hardware SPI
-    #if defined(__AVR) || !TARGET_LPC1768
-      SPI.beginTransaction(max6675_spisettings);
-    #endif  
 
-    v = spiread();
+    SPI.beginTransaction(max6675_spisettings);
+
+    v = SPI.transfer(0);
     v <<= 8;
-    v |= spiread();
-
-    #if defined(__AVR) || !TARGET_LPC1768   
-      SPI.endTransaction();
-    #endif
+    v |= SPI.transfer(0);;
+   
+    SPI.endTransaction();
   } 
   else {
-    //Software SPI
-    v = spiread();
-    v <<= 8;
-    v |= spiread();
+
+    digitalWrite(sclk, LOW);
+    DELAY_US(1000);    
+
+    for (i = 15; i >= 0; i--) {
+      digitalWrite(sclk, LOW);
+      DELAY_US(1000);
+      v <<= 1;
+      if (digitalRead(miso)) {
+	      v |= 1;
+      }
+      
+      digitalWrite(sclk, HIGH);
+      DELAY_US(1000);
+    }
+
+
   }
 
   //disable SPI communication
@@ -164,35 +177,3 @@ uint16_t MAX6675::readRaw16(void) {
   return v; 
 
  }
-
-
-/**********************************************/
-
-uint8_t MAX6675::spiread(void) {
-  int i;
-  uint8_t d = 0;
-  
-  if(sclk == -1) {
-    // hardware SPI
-    #if TARGET_LPC1768
-      d = spiRec();      
-    #else
-      d = SPI.transfer(0);
-    #endif   
-  } 
-  else {
-    // software SPI
-    for (i = 7; i >= 0; i--) {
-    digitalWrite(sclk, LOW);
-    DELAY_US(10);
-    if (digitalRead(miso)) {
-      // set the bit to 0 no matter what
-      d |= (1 << i);
-    }
-      digitalWrite(sclk, HIGH);
-      DELAY_US(10);     
-    }
-  }
-
-  return d;
-}

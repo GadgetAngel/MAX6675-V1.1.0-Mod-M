@@ -35,7 +35,6 @@ private:
   bool initialized;
 
   int8_t sclk, miso, cs;
-  uint8_t spiread(void);
 };
 
 #endif
