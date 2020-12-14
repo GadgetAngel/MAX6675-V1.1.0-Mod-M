@@ -15,8 +15,8 @@
   #include <pgmspace.h>
 #endif
 
-#include <SPI.h>
 #include <stdlib.h>
+#include <SPI.h>
 
 #ifdef __AVR
   static SPISettings max6675_spisettings = 
@@ -167,13 +167,9 @@ uint16_t MAX6675::readRaw16(void) {
       digitalWrite(sclk, HIGH);
       DELAY_US(1000);
     }
-
-
   }
-
   //disable SPI communication
   digitalWrite(cs, HIGH);
 
   return v; 
-
  }
