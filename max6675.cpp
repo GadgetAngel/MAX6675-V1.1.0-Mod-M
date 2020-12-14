@@ -19,8 +19,8 @@
 #include <SPI.h>
 
 #ifdef __AVR
-  static SPISettings max6675_spisettings = 
-      SPISettings(4000000, MSBFIRST, SPI_MODE0);    
+  static SPISettings max6675_spisettings =
+      SPISettings(4000000, MSBFIRST, SPI_MODE0);
 #else
   static SPISettings max6675_spisettings =
       SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);
@@ -29,16 +29,16 @@
 /**************************************************************************/
 /*!
     @brief Create the interface object using software (bitbang) SPI
-    @param _cs the SPI CS pin to use 
+    @param _cs the SPI CS pin to use
     @param _miso the SPI MISO pin to use
-    @param _sclk the SPI clock pin to use   
+    @param _sclk the SPI clock pin to use
 */
 /**************************************************************************/
 MAX6675::MAX6675(int8_t _cs, int8_t _miso, int8_t _sclk) {
   cs = _cs;
   miso = _miso;
   sclk = _sclk;
-  
+
   initialized = false;
 }
 
@@ -57,7 +57,7 @@ MAX6675::MAX6675(int8_t _cs) {
 
 /**************************************************************************/
 /*!
-    @brief Initialize the SPI interface 
+    @brief Initialize the SPI interface
     @return True
 */
 /**************************************************************************/
@@ -71,9 +71,9 @@ void MAX6675::begin(void) {
     // hardware SPI
 
       SPI.begin();
-  } 
+  }
   else {
-    pinMode(sclk, OUTPUT); 
+    pinMode(sclk, OUTPUT);
     pinMode(miso, INPUT);
   }
   initialized = true;
@@ -122,7 +122,7 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 
 /**************************************************************************/
 /*!
-    @brief  Read the raw data packet for the unsigned 16 bits 
+    @brief  Read the raw data packet for the unsigned 16 bits
     that represents the temperature
     @returns Raw value read in 16 bits!
 */
@@ -138,7 +138,7 @@ uint16_t MAX6675::readRaw16(void) {
 
   //enable the SPI communication
   digitalWrite(cs, LOW);
-  DELAY_US(1000); 
+  DELAY_US(1000);
 
   if (sclk == -1) {
     // hardware SPI
@@ -148,13 +148,13 @@ uint16_t MAX6675::readRaw16(void) {
     v = SPI.transfer(0);
     v <<= 8;
     v |= SPI.transfer(0);
-   
+
     SPI.endTransaction();
-  } 
+  }
   else {
 
     digitalWrite(sclk, LOW);
-    DELAY_US(1000);    
+    DELAY_US(1000);
 
     for (i = 15; i >= 0; i--) {
       digitalWrite(sclk, LOW);
@@ -163,7 +163,7 @@ uint16_t MAX6675::readRaw16(void) {
       if (digitalRead(miso)) {
 	      v |= 1;
       }
-      
+
       digitalWrite(sclk, HIGH);
       DELAY_US(1000);
     }
@@ -171,5 +171,5 @@ uint16_t MAX6675::readRaw16(void) {
   //disable SPI communication
   digitalWrite(cs, HIGH);
 
-  return v; 
+  return v;
  }
