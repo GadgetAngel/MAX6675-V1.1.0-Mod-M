@@ -147,7 +147,7 @@ uint16_t MAX6675::readRaw16(void) {
 
     v = SPI.transfer(0);
     v <<= 8;
-    v |= SPI.transfer(0);;
+    v |= SPI.transfer(0);
    
     SPI.endTransaction();
   } 
