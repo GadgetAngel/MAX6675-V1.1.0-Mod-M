@@ -3,7 +3,7 @@
 
 <img src="https://raw.githubusercontent.com/GadgetAngel/MAX6675-V1.1.0-Mod-M/master/images/51FxeVa1rKL._AC_.jpg?raw=true" />
 
-<img src="https://raw.githubusercontent.com/GadgetAngel/MAX6675-V1.1.0-Mod-M/master/images/51FxeVa1rKL._AC_.jpg?raw=true" />
+<img src="https://raw.githubusercontent.com/GadgetAngel/MAX6675-V1.1.0-Mod-M/master/images/HUABAN 2PCS MAX6675 K Type Thermocouple Temperature Sensor Modulejpg2.jpg?raw=true" />
 
 Driver for the [SainSmart MAX6675 Thermocouple Amplifier Module](https://www.amazon.com/SainSmart-MAX6675-Thermocouple-Temperature-0-1024%E2%84%83/dp/B00PVTH4MW)
 or
