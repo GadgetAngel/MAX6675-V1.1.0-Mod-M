@@ -1,5 +1,5 @@
 
-# MAX6675-V1.1.0-Mod-M ![Build Status](https://github.com/adafruit/Adafruit-MAX31855-library/workflows/Arduino%20Library%20CI/badge.svg)
+# MAX6675-V1.1.0-Mod-M <!-- ![Build Status](https://github.com/adafruit/Adafruit-MAX31855-library/workflows/Arduino%20Library%20CI/badge.svg) -->
 
 <img src="https://raw.githubusercontent.com/GadgetAngel/MAX6675-V1.1.0-Mod-M/master/images/51FxeVa1rKL._AC_.jpg?raw=true" />
 
