@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a bug in MAX6675-V1.1.0-Mod-M library
+about: Report a bug in Marlin
 title: "[BUG] (short description)"
 labels: ''
 assignees: ''
