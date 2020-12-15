@@ -1,5 +1,5 @@
 ---
-name: Poen pull request
+name: Open pull request
 about: Open a pull request.
 title: "Title (open a pull request Title)"
 labels: ''
