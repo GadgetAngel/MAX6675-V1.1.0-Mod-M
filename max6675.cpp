@@ -194,7 +194,9 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
   int i;
-  int read_v = 0;
+  #ifdef DEBUG
+    int read_v = 0;
+  #endif
   uint16_t v = 0;
 
  // backcompatibility!
