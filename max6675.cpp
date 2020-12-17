@@ -44,7 +44,7 @@ MAX6675::MAX6675(uint32_t spi_cs, uint32_t spi_miso, uint32_t spi_sclk,
   __sclk = spi_sclk;
   __pin_mapping = pin_mapping;
 
-  if (__pin_mapping) == 0 {
+  if (__pin_mapping == 0) {
     _cs = __cs;
     _miso = __miso;
     _sclk = __sclk;
@@ -67,7 +67,7 @@ MAX6675::MAX6675(uint32_t spi_cs, uint8_t pin_mapping) {
   __sclk = __miso = -1UL;  //-1UL or 0xFFFFFFFF
   __pin_mapping = pin_mapping;
 
-  if (__pin_mapping) == 0 {
+  if (__pin_mapping == 0) {
     _cs = __cs;
     _miso = __miso;
     _sclk = __sclk;
