@@ -245,7 +245,7 @@ uint16_t MAX6675::readRaw16(void) {
 	        v |= 1;
         }
       }
-      
+
 
       if (!__pin_mapping)
         digitalWrite(_sclk, HIGH);
