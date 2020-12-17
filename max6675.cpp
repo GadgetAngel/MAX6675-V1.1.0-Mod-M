@@ -34,7 +34,7 @@
     @param spi_cs the SPI CS pin to use
     @param spi_miso the SPI MISO pin to use
     @param spi_sclk the SPI clock pin to use
-    @param pin_mappping set to 1 for positive pin values
+    @param pin_mapping set to 1 for positive pin values
 */
 /**************************************************************************/
 MAX6675::MAX6675(uint32_t spi_cs, uint32_t spi_miso, uint32_t spi_sclk,
@@ -69,8 +69,8 @@ MAX6675::MAX6675(uint32_t spi_cs, uint8_t pin_mapping) {
 
   if (__pin_mapping == 0) {
     _cs = __cs;
-    _miso = __miso;
-    _sclk = __sclk;
+    _miso = -1;
+    _sclk = -1;
   }
 
   initialized = false;
