@@ -28,29 +28,81 @@
 
 /**************************************************************************/
 /*!
-    @brief Create the interface object using software (bitbang) SPI
-    @param _cs the SPI CS pin to use
-    @param _miso the SPI MISO pin to use
-    @param _sclk the SPI clock pin to use
+    @brief Create the interface object using software (bitbang) SPI for
+    PIN values which are larger than 127. If you have PIN values less than
+    or equal to 127 use the other call for SW SPI.
+    @param spi_cs the SPI CS pin to use
+    @param spi_miso the SPI MISO pin to use
+    @param spi_sclk the SPI clock pin to use
+    @param pin_mappping set to 1 for positive pin values
 */
 /**************************************************************************/
-MAX6675::MAX6675(int8_t _cs, int8_t _miso, int8_t _sclk) {
-  cs = _cs;
-  miso = _miso;
-  sclk = _sclk;
+MAX6675::MAX6675(uint32_t spi_cs, uint32_t spi_miso, uint32_t spi_sclk,
+                 uint8_t pin_mapping) {
+  __cs = spi_cs;
+  __miso = spi_miso;
+  __sclk = spi_sclk;
+  __pin_mapping = pin_mapping;
+
+  if (__pin_mapping) == 0 {
+    _cs = __cs;
+    _miso = __miso;
+    _sclk = __sclk;
+  }
 
   initialized = false;
 }
 
 /**************************************************************************/
 /*!
-    @brief Create the interface object using hardware SPI
-    @param _cs the SPI CS pin to use
+    @brief Create the interface object using hardware SPI for PIN values
+    which are larger than 127. If you have PIN values less than
+    or equal to 127 use the other call for HW SPI
+    @param spi_cs the SPI CS pin to use
+    @param pin_mapping set to 1 for positive pin values
 */
 /**************************************************************************/
-MAX6675::MAX6675(int8_t _cs) {
-  cs = _cs;
-  sclk = miso = -1;
+MAX6675::MAX6675(uint32_t spi_cs, uint8_t pin_mapping) {
+  __cs = spi_cs;
+  __sclk = __miso = -1UL;  //-1UL or 0xFFFFFFFF
+  __pin_mapping = pin_mapping;
+
+  if (__pin_mapping) == 0 {
+    _cs = __cs;
+    _miso = __miso;
+    _sclk = __sclk;
+  }
+
+  initialized = false;
+}
+
+/**************************************************************************/
+/*!
+    @brief Create the interface object using software (bitbang) SPI for PIN
+    values less than or equal to 127.
+    @param spi_cs the SPI CS pin to use
+    @param spi_miso the SPI MISO pin to use
+    @param spi_sclk the SPI clock pin to use
+*/
+/**************************************************************************/
+MAX6675::MAX6675(int8_t spi_cs, int8_t spi_miso, int8_t spi_sclk) {
+  _cs = spi_cs;
+  _miso = spi_miso;
+  _sclk = spi_sclk;
+
+  initialized = false;
+}
+
+/**************************************************************************/
+/*!
+    @brief Create the interface object using hardware SPI for PIN
+    values less than or equal to 127.
+    @param spi_cs the SPI CS pin to use
+*/
+/**************************************************************************/
+MAX6675::MAX6675(int8_t spi_cs) {
+  _cs = spi_cs;
+  _sclk = _miso = -1;
 
   initialized = false;
 }
@@ -64,17 +116,29 @@ MAX6675::MAX6675(int8_t _cs) {
 void MAX6675::begin(void) {
 
   //define pin modes
-  pinMode(cs, OUTPUT);
-  digitalWrite(cs, HIGH);
+  if (!__pin_mapping) {
+    pinMode(_cs, OUTPUT);
+    digitalWrite(_cs, HIGH);
+  }
+  else {
+    pinMode(__cs, OUTPUT);
+    digitalWrite(__cs, HIGH);
+  }
 
-  if (sclk == -1) {
+  if (_sclk == -1 || __sclk == -1UL) {
     // hardware SPI
 
       SPI.begin();
   }
   else {
-    pinMode(sclk, OUTPUT);
-    pinMode(miso, INPUT);
+   if (!__pin_mapping) {
+      pinMode(_sclk, OUTPUT);
+      pinMode(_miso, INPUT);
+   }
+   else {
+      pinMode(__sclk, OUTPUT);
+      pinMode(__miso, INPUT);
+   }
   }
   initialized = true;
 }
@@ -137,10 +201,13 @@ uint16_t MAX6675::readRaw16(void) {
   }
 
   //enable the SPI communication
-  digitalWrite(cs, LOW);
+  if (!__pin_mapping)
+    digitalWrite(_cs, LOW);
+  else
+    digitalWrite(__cs, LOW);
   DELAY_US(1000);
 
-  if (sclk == -1) {
+  if (_sclk == -1 || __sclk == -1UL) {
     // hardware SPI
 
     SPI.beginTransaction(max6675_spisettings);
@@ -153,23 +220,46 @@ uint16_t MAX6675::readRaw16(void) {
   }
   else {
 
-    digitalWrite(sclk, LOW);
+    if (!__pin_mapping)
+      digitalWrite(_sclk, LOW);
+    else
+      digitalWrite(__sclk, LOW);
     DELAY_US(1000);
 
     for (i = 15; i >= 0; i--) {
-      digitalWrite(sclk, LOW);
+      if (!__pin_mapping)
+        digitalWrite(_sclk, LOW);
+      else
+        digitalWrite(__sclk, LOW);
       DELAY_US(1000);
-      v <<= 1;
-      if (digitalRead(miso)) {
-	      v |= 1;
-      }
 
-      digitalWrite(sclk, HIGH);
+      v <<= 1;
+
+      if (!__pin_mapping) {
+        if (digitalRead(_miso)) {
+	        v |= 1;
+        }
+      }
+      else {
+        if (digitalRead(__miso)) {
+	        v |= 1;
+        }
+      }
+      
+
+      if (!__pin_mapping)
+        digitalWrite(_sclk, HIGH);
+      else
+        digitalWrite(__sclk, HIGH);
       DELAY_US(1000);
     }
   }
+
   //disable SPI communication
-  digitalWrite(cs, HIGH);
+  if (!__pin_mapping)
+    digitalWrite(_cs, HIGH);
+  else
+    digitalWrite(__cs, HIGH);
 
   return v;
  }

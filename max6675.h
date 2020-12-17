@@ -18,8 +18,11 @@
 class MAX6675 {
 public:
 
-  MAX6675( int8_t _cs, int8_t _miso, int8_t _sclk);
-  MAX6675(int8_t _cs);
+  MAX6675(uint32_t spi_cs, uint32_t spi_miso, uint32_t spi_sclk, uint8_t pin_mapping);
+  MAX6675(uint32_t spi_cs, uint8_t pin_mapping);
+
+  MAX6675(int8_t spi_cs, int8_t spi_miso, int8_t spi_sclk);
+  MAX6675(int8_t spi_cs);
 
   void begin(void);
   float readCelsius(void);
@@ -34,7 +37,9 @@ private:
 
   bool initialized;
 
-  int8_t sclk, miso, cs;
+  int8_t _sclk, _miso, _cs;
+  uint32_t __sclk, __miso, __cs;
+  uint8_t __pin_mapping = 0x00;
 };
 
 #endif
