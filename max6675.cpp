@@ -2,6 +2,7 @@
 // https://learn.adafruit.com/thermocouple/
 
 #include "max6675.h"
+//#define DEBUG
 
 #ifndef __AVR
   #include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
@@ -193,6 +194,7 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
   int i;
+  int read_v = 0;
   uint16_t v = 0;
 
  // backcompatibility!
@@ -226,6 +228,10 @@ uint16_t MAX6675::readRaw16(void) {
       digitalWrite(__sclk, LOW);
     DELAY_US(1000);
 
+    #ifdef DEBUG
+      Serial.print("\n\nBEGINING of NEW 16bit number: ");
+    #endif
+
     for (i = 15; i >= 0; i--) {
       if (!__pin_mapping)
         digitalWrite(_sclk, LOW);
@@ -236,12 +242,24 @@ uint16_t MAX6675::readRaw16(void) {
       v <<= 1;
 
       if (!__pin_mapping) {
-        if (digitalRead(_miso)) {
+        #ifdef DEBUG
+          read_v = digitalRead(_miso);
+          Serial.print(read_v, HEX);
+          if (read_v) {
+        #else
+          if (digitalRead(_miso)) {
+        #endif
 	        v |= 1;
         }
       }
       else {
-        if (digitalRead(__miso)) {
+        #ifdef DEBUG
+          read_v = digitalRead(__miso);
+          Serial.print(read_v, HEX);
+          if (read_v) {
+        #else
+          if (digitalRead(__miso)) {
+        #endif
 	        v |= 1;
         }
       }
@@ -260,6 +278,10 @@ uint16_t MAX6675::readRaw16(void) {
     digitalWrite(_cs, HIGH);
   else
     digitalWrite(__cs, HIGH);
+
+  #ifdef DEBUG
+    Serial.println(v, HEX);
+  #endif
 
   return v;
  }
