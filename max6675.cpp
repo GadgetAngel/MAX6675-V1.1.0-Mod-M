@@ -185,14 +185,14 @@ void MAX6675::begin(void) {
     if (!__pin_mapping) {
       SERIAL_ECHOLN();
       SERIAL_ECHOLNPAIR("Regular call for _cs: ", _cs ," _miso: ", _miso ," _sclk: ", _sclk);
-      SERIAL_PRINTF("Regular call for _cs: %X  _miso: %X  _sclk: %X  ", _cs, _miso, _sclk);
+      SERIAL_PRINTF("Regular call for _cs: 0x%X  _miso: 0x%X  _sclk: 0x%X  ", _cs, _miso, _sclk);
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
     }
     else {
       SERIAL_ECHOLN();
       SERIAL_ECHOLNPAIR("PIN_MAPPING call for __cs: ", __cs ," __miso: ", __miso ," __sclk: ", __sclk);
-      SERIAL_PRINTF("PIN_MAPPING call for __cs: %X  __miso: %X  __sclk: %X  ", __cs, __miso, __sclk);
+      SERIAL_PRINTF("PIN_MAPPING call for __cs: 0x%X  __miso: 0x%X  __sclk: 0x%X  ", __cs, __miso, __sclk);
       SERIAL_ECHOLN();
       SERIAL_ECHOLN();
     }
@@ -342,20 +342,22 @@ uint16_t MAX6675::readRaw16(void) {
     uint16_t v2 = v >> 3;
   #endif
   #if HAS_STM32_DEBUG
-    Serial.print("v >> 3 : 0b");
+    Serial.print("\nv >> 3 : 0b");
     Serial.print(v2, BIN);
-    Serial.print("  0x");
+    Serial.print("  : 0x");
     Serial.print(v2, HEX);
-    Serial.print("   ");
-    Serial.print(v2);
+    Serial.print("  : ");
+    Serial.println(v2);
+    Serial.println(" ");
   #endif
 
   #if HAS_LPC1768_DEBUG
     SERIAL_ECHOLN();
-    SERIAL_ECHO("v >> 3: 0b");
+    SERIAL_ECHOLN("v >> 3: 0b");
     print_bin(v2);
-    SERIAL_PRINTF("   %X  ", v2);
-    SERIAL_ECHOPAIR(" ", v2);
+    SERIAL_PRINTF("  : 0x%X  ", v2);
+    SERIAL_ECHOLNPAIR(" : ", v2);
+    SERIAL_ECHOLN();
   #endif
 
   return v;
