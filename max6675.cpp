@@ -5,16 +5,15 @@
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
-#if !defined(__AVR) && (defined(DEBUG_LPC_SPI) || defined(DEBUG_LPC))
-  #include "../../../../Marlin/src/core/serial.h"
+#if !defined(__AVR__) && (defined(DEBUG_LPC_SPI) || defined(DEBUG_LPC))
+  #include "../../../../Marlin/src/inc/MarlinConfig.h"
 #endif
-
-#include "max6675.h"
-
 
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
-#ifdef __AVR
+#include "max6675.h"
+
+#ifdef __AVR__
   #include <avr/pgmspace.h>
 #elif defined(ESP8266)
   #include <pgmspace.h>
@@ -23,7 +22,7 @@
 #include <stdlib.h>
 #include <SPI.h>
 
-#ifdef __AVR
+#ifdef __AVR__
   static SPISettings max6675_spisettings =
       SPISettings(4000000, MSBFIRST, SPI_MODE0);
 #else
