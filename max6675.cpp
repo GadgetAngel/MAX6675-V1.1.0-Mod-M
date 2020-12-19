@@ -5,7 +5,7 @@
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
- #if defined(DEBUG_STM32) && defined(STM32F407IX)
+ #if defined(STM32F407IX) && defined(DEBUG_STM32)
   #define HAS_STM32_DEBUG 1
  #endif
 
