@@ -288,7 +288,7 @@ uint16_t MAX6675::readRaw16(void) {
     DELAY_US(1000);
 
     #if HAS_STM32_DEBUG
-      Serial.print("\n\nBEGINING of NEW 16-bit number: ");
+      Serial.print("\n\nBEGINING of NEW 16-bit number: 0b");
     #endif
 
     for (i = 15; i >= 0; i--) {
@@ -340,9 +340,9 @@ uint16_t MAX6675::readRaw16(void) {
 
   #if HAS_STM32_DEBUG
     uint16_t v3 = v >> 3;
-    Serial.print("v >> 3 : ");
+    Serial.print("v >> 3 : 0b");
     Serial.print(v3, BIN);
-    Serial.print("  ")
+    Serial.print("  0x")
     Serial.print(v3, HEX);
     Serial.print("   ");
     Serial.print(v3);
@@ -351,7 +351,7 @@ uint16_t MAX6675::readRaw16(void) {
   #if HAS_LPC1768_DEBUG
     uint16_t v2 = v >> 3;
     SERIAL_ECHOLN();
-    SERIAL_ECHO("v >> 3: ");
+    SERIAL_ECHO("v >> 3: 0b");
     print_bin(v2);
     SERIAL_PRINTF("   %X  ", v2);
     SERIAL_ECHOPAIR(" ", v2);
