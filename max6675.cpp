@@ -5,17 +5,17 @@
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
- #if defined(STM32F407IX) && defined(DEBUG_STM32)
+#if defined(STM32F407IX) && defined(DEBUG_STM32)
   #define HAS_STM32_DEBUG 1
- #endif
+#endif
 
- #if defined(TARGET_LPC1768) && defined(DEBUG_LPC)
+#if defined(TARGET_LPC1768) && defined(DEBUG_LPC)
   #define HAS_LPC1768_DEBUG 1
- #endif
+#endif
 
- #if defined(TARGET_LPC1768) && defined(DEBUG_LPC_SPI)
+#if defined(TARGET_LPC1768) && defined(DEBUG_LPC_SPI)
   #define HAS_LPC1768_DEBUG_SPI 1
- #endif
+#endif
 
 #if HAS_LPC1768_DEBUG || HAS_LPC1768_DEBUG_SPI
   #include "../../../../Marlin/src/inc/MarlinConfig.h"
