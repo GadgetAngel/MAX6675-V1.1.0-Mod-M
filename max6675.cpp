@@ -5,13 +5,13 @@
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
-#if !defined(__AVR__) && (defined(DEBUG_LPC_SPI) || defined(DEBUG_LPC))
+#if !defined(__AVR__) && defined(TARGET_LPC1768) && (defined(DEBUG_LPC_SPI) || defined(DEBUG_LPC))
   #include "../../../../Marlin/src/inc/MarlinConfig.h"
 #endif
 
-#include "../../../../Marlin/src/HAL/shared/Delay.h"
-
 #include "max6675.h"
+
+#include "../../../../Marlin/src/HAL/shared/Delay.h"
 
 #ifdef __AVR__
   #include <avr/pgmspace.h>
