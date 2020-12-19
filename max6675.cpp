@@ -5,7 +5,19 @@
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
-#if !defined(__AVR__) && defined(TARGET_LPC1768) && (defined(DEBUG_LPC_SPI) || defined(DEBUG_LPC))
+ #if defined(DEBUG_STM32) && defined(STM32F407IX)
+  #define HAS_STM32_DEBUG 1
+ #endif
+
+ #if defined(TARGET_LPC1768) && defined(DEBUG_LPC)
+  #define HAS_LPC1768_DEBUG 1
+ #endif
+
+ #if defined(TARGET_LPC1768) && defined(DEBUG_LPC_SPI)
+  #define HAS_LPC1768_DEBUG_SPI 1
+ #endif
+
+#if HAS_LPC1768_DEBUG || HAS_LPC1768_DEBUG_SPI
   #include "../../../../Marlin/src/inc/MarlinConfig.h"
 #endif
 
@@ -145,7 +157,7 @@ void MAX6675::begin(void) {
    }
   }
 
-  #ifdef DEBUG_STM32
+  #if HAS_STM32_DEBUG
     if (!__pin_mapping) {
       Serial.print("\n\n_cs: ");
       Serial.print(_cs);
@@ -168,7 +180,7 @@ void MAX6675::begin(void) {
     }
   #endif
 
-  #ifdef DEBUG_LPC_SPI
+  #if HAS_LPC1768_DEBUG_SPI
     // for testing
     if (!__pin_mapping) {
       SERIAL_ECHOLN();
@@ -239,7 +251,7 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
   int i;
-  #ifdef DEBUG_STM32
+  #if HAS_STM32_DEBUG
     int read_v = 0;
   #endif
   uint16_t v = 0;
@@ -275,7 +287,7 @@ uint16_t MAX6675::readRaw16(void) {
       digitalWrite(__sclk, LOW);
     DELAY_US(1000);
 
-    #ifdef DEBUG_STM32
+    #if HAS_STM32_DEBUG
       Serial.print("\n\nBEGINING of NEW 16-bit number: ");
     #endif
 
@@ -289,7 +301,7 @@ uint16_t MAX6675::readRaw16(void) {
       v <<= 1;
 
       if (!__pin_mapping) {
-        #ifdef DEBUG_STM32
+        #if HAS_STM32_DEBUG
           read_v = digitalRead(_miso);
           Serial.print(read_v, HEX);
           if (read_v) {
@@ -300,7 +312,7 @@ uint16_t MAX6675::readRaw16(void) {
         }
       }
       else {
-        #ifdef DEBUG_STM32
+        #if HAS_STM32_DEBUG
           read_v = digitalRead(__miso);
           Serial.print(read_v, HEX);
           if (read_v) {
@@ -326,7 +338,7 @@ uint16_t MAX6675::readRaw16(void) {
   else
     digitalWrite(__cs, HIGH);
 
-  #ifdef DEBUG_STM32
+  #if HAS_STM32_DEBUG
     uint16_t v3 = v >> 3;
     Serial.print("v >> 3 : ");
     Serial.print(v3, BIN);
@@ -336,7 +348,7 @@ uint16_t MAX6675::readRaw16(void) {
     Serial.print(v3);
   #endif
 
-  #ifdef DEBUG_LPC
+  #if HAS_LPC1768_DEBUG
     uint16_t v2 = v >> 3;
     SERIAL_ECHOLN();
     SERIAL_ECHO("v >> 3: ");
