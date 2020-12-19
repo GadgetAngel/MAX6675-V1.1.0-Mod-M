@@ -1,12 +1,16 @@
 // this library is public domain. enjoy!
 // https://learn.adafruit.com/thermocouple/
 
-#include "max6675.h"
-//#define DEBUG
+//#define DEBUG_STM32
+//#define DEBUG_LPC_SPI
+//#define DEBUG_LPC
 
-#ifndef __AVR
-  #include "../../../../Marlin/src/HAL/shared/HAL_SPI.h"
+#if !defined(__AVR) && (defined(DEBUG_LPC_SPI) || defined(DEBUG_LPC))
+  #include "../../../../Marlin/src/core/serial.h"
 #endif
+
+#include "max6675.h"
+
 
 #include "../../../../Marlin/src/HAL/shared/Delay.h"
 
@@ -141,6 +145,48 @@ void MAX6675::begin(void) {
       pinMode(__miso, INPUT);
    }
   }
+
+  #ifdef DEBUG_STM32
+    if (!__pin_mapping) {
+      Serial.print("\n\n_cs: ");
+      Serial.print(_cs);
+      Serial.print(" _miso: ");
+      Serial.print(_miso);
+      Serial.print(" _sclk: ");
+      Serial.print(_sclk);
+      Serial.print("\n\n");
+    }
+    else {
+      Serial.print("\n\n__cs: ");
+      Serial.print(__cs);
+      Serial.print(" __miso: ");
+      Serial.print(__miso);
+      Serial.print(" __sclk: ");
+      Serial.print(__sclk);
+      Serial.print(" __pin_mapping: ");
+      Serial.print(__pin_mapping);
+      Serial.print("\n\n");
+    }
+  #endif
+
+  #ifdef DEBUG_LPC_SPI
+    // for testing
+    if (!__pin_mapping) {
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLNPAIR("Regular call for _cs: ", _cs ," _miso: ", _miso ," _sclk: ", _sclk);
+      SERIAL_PRINTF("Regular call for _cs: %X  _miso: %X  _sclk: %X  ", _cs, _miso, _sclk);
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+    }
+    else {
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLNPAIR("PIN_MAPPING call for __cs: ", __cs ," __miso: ", __miso ," __sclk: ", __sclk);
+      SERIAL_PRINTF("PIN_MAPPING call for __cs: %X  __miso: %X  __sclk: %X  ", __cs, __miso, __sclk);
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+    }
+  #endif
+
   initialized = true;
 }
 
@@ -194,7 +240,7 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
   int i;
-  #ifdef DEBUG
+  #ifdef DEBUG_STM32
     int read_v = 0;
   #endif
   uint16_t v = 0;
@@ -230,8 +276,8 @@ uint16_t MAX6675::readRaw16(void) {
       digitalWrite(__sclk, LOW);
     DELAY_US(1000);
 
-    #ifdef DEBUG
-      Serial.print("\n\nBEGINING of NEW 16bit number: ");
+    #ifdef DEBUG_STM32
+      Serial.print("\n\nBEGINING of NEW 16-bit number: ");
     #endif
 
     for (i = 15; i >= 0; i--) {
@@ -244,7 +290,7 @@ uint16_t MAX6675::readRaw16(void) {
       v <<= 1;
 
       if (!__pin_mapping) {
-        #ifdef DEBUG
+        #ifdef DEBUG_STM32
           read_v = digitalRead(_miso);
           Serial.print(read_v, HEX);
           if (read_v) {
@@ -255,7 +301,7 @@ uint16_t MAX6675::readRaw16(void) {
         }
       }
       else {
-        #ifdef DEBUG
+        #ifdef DEBUG_STM32
           read_v = digitalRead(__miso);
           Serial.print(read_v, HEX);
           if (read_v) {
@@ -281,8 +327,23 @@ uint16_t MAX6675::readRaw16(void) {
   else
     digitalWrite(__cs, HIGH);
 
-  #ifdef DEBUG
-    Serial.println(v, HEX);
+  #ifdef DEBUG_STM32
+    uint16_t v3 = v >> 3;
+    Serial.print("v >> 3 : ");
+    Serial.print(v3, BIN);
+    Serial.print("  ")
+    Serial.print(v3, HEX);
+    Serial.print("   ");
+    Serial.print(v3);
+  #endif
+
+  #ifdef DEBUG_LPC
+    uint16_t v2 = v >> 3;
+    SERIAL_ECHOLN();
+    SERIAL_ECHO("v >> 3: ");
+    print_bin(v2);
+    SERIAL_PRINTF("   %X  ", v2);
+    SERIAL_ECHOPAIR(" ", v2);
   #endif
 
   return v;
