@@ -338,18 +338,19 @@ uint16_t MAX6675::readRaw16(void) {
   else
     digitalWrite(__cs, HIGH);
 
+  #if HAS_STM32_DEBUG || HAS_LPC1768_DEBUG
+    uint16_t v2 = v >> 3;
+  #endif
   #if HAS_STM32_DEBUG
-    uint16_t v3 = v >> 3;
     Serial.print("v >> 3 : 0b");
-    Serial.print(v3, BIN);
-    Serial.print("  0x")
-    Serial.print(v3, HEX);
+    Serial.print(v2, BIN);
+    Serial.print("  0x");
+    Serial.print(v2, HEX);
     Serial.print("   ");
-    Serial.print(v3);
+    Serial.print(v2);
   #endif
 
   #if HAS_LPC1768_DEBUG
-    uint16_t v2 = v >> 3;
     SERIAL_ECHOLN();
     SERIAL_ECHO("v >> 3: 0b");
     print_bin(v2);
