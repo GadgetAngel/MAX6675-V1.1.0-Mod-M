@@ -3,6 +3,7 @@
 
 //#define DEBUG_STM32
 //#define DEBUG_STM32_SPI
+//#define DEBUG_STM32_READ
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
@@ -12,6 +13,10 @@
 
 #if defined(ARDUINO_ARCH_STM32) && defined(DEBUG_STM32_SPI)
   #define HAS_STM32_DEBUG_SPI 1
+#endif
+
+#if defined(ARDUINO_ARCH_STM32) && defined(DEBUG_STM32_READ)
+  #define HAS_STM32_DEBUG_READ 1
 #endif
 
 #if defined(ARDUINO_ARCH_LPC176X) && defined(DEBUG_LPC)
@@ -366,7 +371,7 @@ uint16_t MAX6675::readRaw16(void) {
 
 uint16_t MAX6675::spiread16(void) {
   int i;
-  #if HAS_STM32_DEBUG
+  #if HAS_STM32_DEBUG_READ
     int read_v = 0;
   #endif
   uint16_t v = 0;
@@ -402,7 +407,7 @@ uint16_t MAX6675::spiread16(void) {
       digitalWrite(__sclk, LOW);
     DELAY_US(1000);
 
-    #if HAS_STM32_DEBUG
+    #if HAS_STM32_DEBUG_READ
       Serial.print("\n\nBEGINING of NEW 16-bit number: 0b");
     #endif
 
@@ -416,7 +421,7 @@ uint16_t MAX6675::spiread16(void) {
       v <<= 1;
 
       if (!__pin_mapping) {
-        #if HAS_STM32_DEBUG
+        #if HAS_STM32_DEBUG_READ
           read_v = digitalRead(_miso);
           Serial.print(read_v, HEX);
           if (read_v) {
@@ -427,7 +432,7 @@ uint16_t MAX6675::spiread16(void) {
         }
       }
       else {
-        #if HAS_STM32_DEBUG
+        #if HAS_STM32_DEBUG_READ
           read_v = digitalRead(__miso);
           Serial.print(read_v, HEX);
           if (read_v) {
