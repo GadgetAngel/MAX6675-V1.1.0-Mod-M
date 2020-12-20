@@ -6,19 +6,19 @@
 //#define DEBUG_LPC_SPI
 //#define DEBUG_LPC
 
-#if defined(STM32F407IX) && defined(DEBUG_STM32)
+#if defined(ARDUINO_ARCH_STM32) && defined(DEBUG_STM32)
   #define HAS_STM32_DEBUG 1
 #endif
 
-#if defined(STM32F407IX) && defined(DEBUG_STM32_SPI)
+#if defined(ARDUINO_ARCH_STM32) && defined(DEBUG_STM32_SPI)
   #define HAS_STM32_DEBUG_SPI 1
 #endif
 
-#if defined(TARGET_LPC1768) && defined(DEBUG_LPC)
+#if defined(ARDUINO_ARCH_LPC176X) && defined(DEBUG_LPC)
   #define HAS_LPC1768_DEBUG 1
 #endif
 
-#if defined(TARGET_LPC1768) && defined(DEBUG_LPC_SPI)
+#if defined(ARDUINO_ARCH_LPC176X) && defined(DEBUG_LPC_SPI)
   #define HAS_LPC1768_DEBUG_SPI 1
 #endif
 
@@ -260,7 +260,37 @@ float MAX6675::readCelsius(void) {
 
   uint16_t v;
 
-  v = readRaw16();
+  //v = readRaw16();
+
+  if (!first_reading)
+    v = spiread16();
+  else {
+    first_reading = false;
+    v = spiread16();
+    #if HAS_STM32_DEBUG
+      Serial.print("\n\n1st Reading: 0x");
+      Serial.println(v, HEX);
+    #endif
+    #if HAS_LPC1768_DEBUG
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+      SERIAL_ECHO("1st Reading:");
+      SERIAL_PRINTF("   0x%X  ", v);
+      SERIAL_ECHOLN();
+    #endif
+    v = spiread16();
+    #if HAS_STM32_DEBUG
+      Serial.print("\n\n2nd Reading: 0x");
+      Serial.println(v, HEX);
+    #endif
+    #if HAS_LPC1768_DEBUG
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+      SERIAL_ECHO("2nd Reading:");
+      SERIAL_PRINTF("   0x%X  ", v);
+      SERIAL_ECHOLN();
+    #endif
+  }
 
   if (v & 0x4) {
     // uh oh, no thermocouple attached!
@@ -299,6 +329,43 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 */
 /**************************************************************************/
 uint16_t MAX6675::readRaw16(void) {
+  uint16_t d = 0;
+
+  if (!first_reading)
+    return spiread16();
+  else {
+    first_reading = false;
+    d = spiread16();
+    #if HAS_STM32_DEBUG
+      Serial.print("\n\n1st Reading: 0x");
+      Serial.println(d, HEX);
+    #endif
+    #if HAS_LPC1768_DEBUG
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+      SERIAL_ECHO("1st Reading:");
+      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_ECHOLN();
+    #endif
+    d = spiread16();
+    #if HAS_STM32_DEBUG
+      Serial.print("\n\n2nd Reading: 0x");
+      Serial.println(d, HEX);
+    #endif
+    #if HAS_LPC1768_DEBUG
+      SERIAL_ECHOLN();
+      SERIAL_ECHOLN();
+      SERIAL_ECHO("2nd Reading:");
+      SERIAL_PRINTF("   0x%X  ", d);
+      SERIAL_ECHOLN();
+    #endif
+    return d;
+  }
+}
+
+/**************************************************************************/
+
+uint16_t MAX6675::spiread16(void) {
   int i;
   #if HAS_STM32_DEBUG
     int read_v = 0;
