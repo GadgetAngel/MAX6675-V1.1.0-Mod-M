@@ -259,6 +259,7 @@ void MAX6675::begin(void) {
 float MAX6675::readCelsius(void) {
   uint16_t v;
 
+  // prime the SPI communication channel
   if (!first_reading)
     v = spiread16();
   else {
@@ -328,6 +329,7 @@ float MAX6675::readFahrenheit(void) { return readCelsius() * 9.0 / 5.0 + 32; }
 uint16_t MAX6675::readRaw16(void) {
   uint16_t d = 0;
 
+  // prime the SPI communication channel
   if (!first_reading)
     return spiread16();
   else {
