@@ -257,10 +257,7 @@ void MAX6675::begin(void) {
 */
 /**************************************************************************/
 float MAX6675::readCelsius(void) {
-
   uint16_t v;
-
-  //v = readRaw16();
 
   if (!first_reading)
     v = spiread16();
