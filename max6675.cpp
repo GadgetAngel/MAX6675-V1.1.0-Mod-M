@@ -44,30 +44,30 @@
 #include <stdlib.h>
 #include <SPI.h>
 
-#if defined(TARGET_LPC1768)
-  #if defined(TEMP_MODE3)
-    static SPISettings max6675_spisettings =
-      SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE3);
+#if defined(TEMP_MODE)
+  #if TEMP_MODE == 3
+    #define MAX6675_SPI_MODE SPI_MODE3
+  #elif TEMP_MODE == 2
+    #define MAX6675_SPI_MODE SPI_MODE2
+  #elif TEMP_MODE == 1
+    #define MAX6675_SPI_MODE SPI_MODE1
   #else
-    static SPISettings max6675_spisettings =
-      SPISettings(SPI_QUARTER_SPEED, MSBFIRST, SPI_MODE0);
-  #endif
-#elif defined(ARDUINO_ARCH_STM32)
-  #if defined(TEMP_MODE3)
-    static SPISettings max6675_spisettings =
-      SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE3);
-  #else
-    static SPISettings max6675_spisettings =
-      SPISettings(SPI_CLOCK_DIV4, MSBFIRST, SPI_MODE0);
+    #define MAX6675_SPI_MODE SPI_MODE0
   #endif
 #else
-  #if defined(TEMP_MODE3)
-    static SPISettings max6675_spisettings =
-      SPISettings(4000000, MSBFIRST, SPI_MODE3);
-  #else
-    static SPISettings max6675_spisettings =
-      SPISettings(4000000, MSBFIRST, SPI_MODE0);
-  #endif
+  // default to origial settings
+  #define MAX6675_SPI_MODE SPI_MODE0
+#endif
+
+#if defined(TARGET_LPC1768)
+  static SPISettings max6675_spisettings =
+    SPISettings(SPI_QUARTER_SPEED, MSBFIRST, MAX6675_SPI_MODE);
+#elif defined(ARDUINO_ARCH_STM32)
+  static SPISettings max6675_spisettings =
+    SPISettings(SPI_CLOCK_DIV4, MSBFIRST, MAX6675_SPI_MODE);
+#else
+  static SPISettings max6675_spisettings =
+    SPISettings(4000000, MSBFIRST, MAX6675_SPI_MODE);
 #endif
 
 /**************************************************************************/
